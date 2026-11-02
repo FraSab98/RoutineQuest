@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: routine-quest-web
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -c "from app import init_db; init_db()" && gunicorn --bind 0.0.0.0:$PORT app:app
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: routine-quest-db
+          property: connectionString
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+  - type: cron
+    name: routine-quest-notifications
+    runtime: python
+    plan: starter
+    schedule: "*/5 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python cron.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: routine-quest-db
+          property: connectionString
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+databases:
+  - name: routine-quest-db
+    plan: basic-256mb
+    databaseName: routinequest
+    user: routinequest

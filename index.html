@@ -1,0 +1,144 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/icon-192.png"><link rel="apple-touch-icon" href="./icons/icon-192.png"><title>Routine Quest</title><style>:root{font-family:Inter,system-ui,sans-serif;color:#e8edf8;background:#0b1020}*{box-sizing:border-box}body{margin:0}main{max-width:1050px;margin:auto;padding:25px 16px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}h1{margin:0;font-size:30px}.muted{color:#9daac6}.card{background:#161f35;border:1px solid #293651;border-radius:18px;padding:18px;margin:14px 0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat b{font-size:27px;display:block;margin-top:8px}.bar{height:12px;background:#2a3650;border-radius:15px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#38bdf8,#a78bfa);width:0}button,input,select{font:inherit}button{background:#33415e;color:white;border:0;padding:10px 13px;border-radius:11px;cursor:pointer}button.primary{background:#6d5df5}button.danger{background:#572e42}button:hover{filter:brightness(1.2)}.days{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.days button.active{background:#6d5df5}.task{display:flex;align-items:center;gap:12px;border-top:1px solid #2b3650;padding:13px 0}.task .info{flex:1;min-width:0}.task strong{display:block}.task small{color:#a7b5d0}.task.done strong{text-decoration:line-through;opacity:.6}.check{width:25px;height:25px;accent-color:#8b7bff}.actions{display:flex;gap:6px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{border-radius:30px;padding:4px 9px;background:#293855;font-size:12px}.modal{position:fixed;inset:0;background:#000b;display:none;place-items:center;padding:14px;z-index:10}.modal.show{display:grid}.dialog{background:#1b2540;padding:22px;border-radius:20px;width:min(500px,100%);max-height:95vh;overflow:auto}.field{display:grid;gap:5px;margin:11px 0}input,select{background:#0d1528;border:1px solid #43506d;color:white;padding:10px;border-radius:9px;width:100%}label{font-size:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hint{font-size:13px;color:#9daac6}.foot{margin-top:20px;color:#9daac6;font-size:12px}@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.days{grid-template-columns:repeat(4,1fr)}.task{align-items:flex-start}.actions{flex-direction:column}h1{font-size:24px}}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tabs button.active{background:#6d5df5}
+.panel{display:none}.panel.active{display:block}
+.monthbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.monthgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:14px}
+.monthcell{min-height:77px;border:1px solid #34405b;background:#101a2e;color:#e8edf8;padding:7px 4px;border-radius:9px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:4px}
+.monthcell.empty{background:transparent;border:0}.monthcell.today{border-color:#a78bfa}.monthcell.selected{background:#373278}
+.monthcell .num{font-weight:700}.monthcell .tiny{font-size:11px;color:#aebbd6}.monthcell .mini{height:5px;background:#33415e;border-radius:6px;overflow:hidden}.monthcell .mini i{display:block;height:100%;background:#36caa3}
+.weekhead{text-align:center;font-size:12px;color:#9daac6}
+.chartbars{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;align-items:end;height:175px;padding:14px 0}
+.chartcol{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px;height:100%;font-size:11px;color:#b9c5db}
+.chartcol .track{height:125px;width:min(38px,100%);background:#26344c;border-radius:8px;display:flex;align-items:flex-end;overflow:hidden}
+.chartcol .track i{width:100%;background:linear-gradient(#5eead4,#6d5df5);border-radius:8px;min-height:0}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{padding:15px;background:#101a2e;border-radius:12px}.metric b{display:block;font-size:23px;margin-top:5px}
+.switchrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #293651}
+.switchrow input{width:auto}.notification-status{font-size:13px;color:#aebbd6}
+@media(max-width:650px){.metrics{grid-template-columns:1fr 1fr}.monthcell{min-height:65px}.monthcell .tiny{font-size:9px}.monthgrid{gap:3px}}
+</style></head><body><main><div class="top"><div><h1>⚡ Routine Quest</h1><div class="muted">Ogni piccola azione è una vittoria.</div></div><div class="row"><button id="export">↓ Esporta</button><button id="import">↑ Importa</button><input type="file" id="file" accept="application/json" hidden><button class="primary" id="add">+ Nuova attività</button></div></div><div class="tabs" role="tablist" aria-label="Sezioni"><button class="active" data-tab="daily">☀️ Giornata</button><button data-tab="calendar">🗓️ Calendario</button><button data-tab="insights">📊 Statistiche</button><button data-tab="settings">🔔 Promemoria</button></div>
+<section class="panel active" id="panel-daily">
+<div class="stats"><div class="card stat"><span class="muted">⭐ XP totali</span><b id="xp">0</b></div><div class="card stat"><span class="muted">🏆 Livello</span><b id="level">1</b></div><div class="card stat"><span class="muted">🔥 Serie</span><b id="streak">0 giorni</b></div><div class="card stat"><span class="muted">🎯 Oggi</span><b id="todayScore">0/0</b></div></div><div class="card"><div class="row" style="justify-content:space-between"><b id="levelLabel">Progresso livello</b><span id="progressLabel" class="muted"></span></div><div class="bar" style="margin-top:12px"><div class="fill" id="levelBar"></div></div></div><div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">📅 Settimana</h2><span class="hint">Seleziona il giorno da gestire</span></div><div class="days" id="days" style="margin-top:15px"></div></div><div class="card"><div class="row" style="justify-content:space-between"><div><h2 id="heading" style="margin:0">Attività</h2><div class="muted" id="dateLabel"></div></div><div class="row"><button id="prev">←</button><button id="current">Oggi</button><button id="next">→</button></div></div><div class="bar" style="margin:17px 0"><div class="fill" id="dayBar"></div></div><div id="tasks"></div></div><div class="card"><h2>🎖️ Traguardi</h2><div class="row" id="badges"></div></div></section>
+<section class="panel" id="panel-calendar">
+<div class="card"><div class="monthbar"><button id="monthPrev" aria-label="Mese precedente">←</button><h2 id="monthTitle" style="margin:0"></h2><button id="monthNext" aria-label="Mese successivo">→</button></div>
+<div class="monthgrid" id="monthGrid"></div><p class="hint">Seleziona una data per aprirne le attività.</p></div></section>
+<section class="panel" id="panel-insights"><div class="card"><h2>📈 I tuoi progressi</h2><div class="metrics" id="metrics"></div><h3>Completamento negli ultimi 7 giorni</h3><div class="chartbars" id="weeklyChart"></div><h3>Progressi per categoria (ultimi 30 giorni)</h3><div id="categoryStats"></div></div></section>
+<section class="panel" id="panel-settings"><div class="card"><h2>🔔 Promemoria</h2><p class="muted">Attiva le notifiche e scegli quando ricevere un promemoria. Con il server Render attivo, i promemoria push arrivano anche quando l'app è chiusa (compatibilmente con i permessi del dispositivo).</p>
+<div class="switchrow"><label for="notifyEnabled">Attiva promemoria</label><input type="checkbox" id="notifyEnabled"></div>
+<div class="field"><label for="notifyBefore">Minuti prima dell'attività</label><select id="notifyBefore"><option value="0">All'inizio</option><option value="5">5 minuti</option><option value="10">10 minuti</option><option value="15">15 minuti</option><option value="30">30 minuti</option></select></div>
+<button id="testNotify">Invia notifica di prova</button><p class="notification-status" id="notifyStatus"></p>
+</div><div class="card"><h2>📲 Installazione</h2><p class="muted">Apri l'app da un sito HTTPS. Sul browser compatibile usa «Installa app»; su iPhone apri il menu Condividi di Safari e scegli «Aggiungi alla schermata Home».</p><button id="installBtn" style="display:none" class="primary">Installa Routine Quest</button><p class="hint" id="installHint">L'installazione richiede HTTPS (oppure localhost).</p></div></section>
+<p class="foot">I dati vengono salvati nel browser di questo dispositivo. Esporta periodicamente un backup JSON per non perdere i progressi. Nessun account o server richiesto.</p></main><div class="modal" id="modal"><form class="dialog" id="form"><h2 id="formTitle">Nuova attività</h2><input type="hidden" id="taskId"><div class="field"><label for="name">Nome attività</label><input id="name" required maxlength="90" placeholder="Es. Inglese"></div><div class="two"><div class="field"><label for="start">Inizio</label><input id="start" type="time" required></div><div class="field"><label for="end">Fine</label><input id="end" type="time" required></div></div><div class="field"><label for="category">Categoria</label><select id="category"><option>Lavoro</option><option>Studio</option><option>Inglese</option><option>Sport</option><option>Benessere</option><option>Tempo libero</option><option>Altro</option></select></div><div class="field"><label for="repeat">Ripetizione</label><select id="repeat"><option value="weekly">Ogni settimana nei giorni selezionati</option><option value="once">Solo nella data selezionata</option></select></div><div class="field" id="weekField"><label>Giorni (puoi selezionarne più di uno)</label><div class="row" id="weekChecks"></div></div><div class="field"><label for="points">XP completamento</label><input id="points" type="number" min="5" max="100" step="5" value="20" required></div><div class="row" style="justify-content:flex-end;margin-top:20px"><button type="button" id="cancel">Annulla</button><button class="primary" type="submit">Salva attività</button></div></form></div><script>
+const $=id=>document.getElementById(id), names=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const weekday=d=>(d.getDay()+6)%7;const dateFrom=s=>new Date(s+'T12:00:00');const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);let selected=new Date();selected.setHours(12,0,0,0);let editId=null;
+const seed=()=>{let a=[];function add(name,start,end,category,days,points=20){a.push({id:uid(),name,start,end,category,days,points,repeat:'weekly'})}add('Lavoro','09:30','13:00','Lavoro',[0,1,2,3,4],25);add('Studio universitario','14:00','15:15','Studio',[0],25);add('Studio universitario','14:00','16:00','Studio',[1],35);add('Studio universitario','14:00','15:00','Studio',[2],20);add('Studio universitario','14:00','16:30','Studio',[3],40);add('Studio e ripasso','14:00','15:30','Studio',[4],25);add('Calcio','16:00','19:00','Sport',[0],40);add('Calcio','16:00','21:00','Sport',[2],50);add('Calcio','18:00','21:00','Sport',[4],40);add('Inglese','20:30','21:00','Inglese',[0],15);add('Inglese','16:30','17:15','Inglese',[1],20);add('Inglese','16:30','17:15','Inglese',[3],20);add('Inglese','15:30','16:00','Inglese',[4],15);add('Palestra leggera / mobilità','17:30','18:30','Sport',[1],20);add('Progetti professionali','18:00','19:00','Studio',[3],20);add('Pianifica la settimana','18:00','18:30','Benessere',[6],15);add('Routine serale','23:00','23:30','Benessere',[0,1,2,3,4,5,6],10);return a};
+function load(){try{const x=JSON.parse(localStorage.getItem('routineQuestV1'));if(x&&Array.isArray(x.tasks)&&x.done&&typeof x.done==='object')return x}catch(e){}return {tasks:seed(),done:{}}}let state=load();const save=()=>{localStorage.setItem('routineQuestV1',JSON.stringify(state));if(typeof schedulePushSync==='function')schedulePushSync()};localStorage.setItem('routineQuestV1',JSON.stringify(state));function occurs(t,d){return t.repeat==='once'?t.date===iso(d):t.days.includes(weekday(d))}function tasksFor(d){return state.tasks.filter(t=>occurs(t,d)).sort((a,b)=>a.start.localeCompare(b.start))}function key(t,d){return t.id+'@'+iso(d)}function earned(){return Object.entries(state.done).reduce((n,[k,v])=>{if(!v)return n;const t=state.tasks.find(t=>k.startsWith(t.id+'@'));return n+(t?Number(t.points)||0:0)},0)}function streak(){let d=new Date();d.setHours(12,0,0,0);let count=0;for(let i=0;i<366;i++){let ts=tasksFor(d);let all=ts.length>0&&ts.every(t=>state.done[key(t,d)]);if(!all){if(i===0){d.setDate(d.getDate()-1);continue}break}count++;d.setDate(d.getDate()-1)}return count}function render(){let xp=earned(),lvl=Math.floor(xp/250)+1,rem=xp%250; $('xp').textContent=xp;$('level').textContent=lvl;$('levelLabel').textContent='Livello '+lvl+' · '+(250-rem)+' XP al prossimo';$('progressLabel').textContent=rem+'/250 XP';$('levelBar').style.width=rem/250*100+'%';$('streak').textContent=streak()+' giorni';let today=new Date(),todayTasks=tasksFor(today);$('todayScore').textContent=todayTasks.filter(t=>state.done[key(t,today)]).length+'/'+todayTasks.length;let weekStart=new Date(selected);weekStart.setDate(selected.getDate()-weekday(selected));$('days').innerHTML='';for(let i=0;i<7;i++){let d=new Date(weekStart);d.setDate(weekStart.getDate()+i);let b=document.createElement('button');b.textContent=names[i]+' '+d.getDate();if(iso(d)===iso(selected))b.classList.add('active');b.onclick=()=>{selected=d;render()};$('days').appendChild(b)}$('heading').textContent=selected.toLocaleDateString('it-IT',{weekday:'long'});$('dateLabel').textContent=selected.toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});let ts=tasksFor(selected),completed=ts.filter(t=>state.done[key(t,selected)]).length;$('dayBar').style.width=(ts.length?completed/ts.length*100:0)+'%';$('tasks').innerHTML='';if(!ts.length)$('tasks').innerHTML='<p class="muted">Nessuna attività. Aggiungine una con il pulsante in alto.</p>';for(let t of ts){let done=!!state.done[key(t,selected)];let el=document.createElement('div');el.className='task'+(done?' done':'');let check=document.createElement('input');check.type='checkbox';check.className='check';check.checked=done;check.setAttribute('aria-label','Completa '+t.name);check.onchange=()=>{if(check.checked)state.done[key(t,selected)]=true;else delete state.done[key(t,selected)];save();render()};let info=document.createElement('div');info.className='info';let title=document.createElement('strong');title.textContent=t.name;let small=document.createElement('small');small.textContent=t.start+'–'+t.end+' · '+t.category+' · +'+t.points+' XP';info.append(title,small);let actions=document.createElement('div');actions.className='actions';let edit=document.createElement('button');edit.textContent='✎';edit.title='Modifica';edit.onclick=()=>openForm(t);let del=document.createElement('button');del.textContent='×';del.title='Elimina';del.className='danger';del.onclick=()=>{if(confirm('Eliminare questa attività e i suoi progressi?')){state.tasks=state.tasks.filter(x=>x.id!==t.id);Object.keys(state.done).forEach(k=>{if(k.startsWith(t.id+'@'))delete state.done[k]});save();render()}};actions.append(edit,del);el.append(check,info,actions);$('tasks').appendChild(el)}let badges=[['🌱','Primi passi',xp>=20],['🚀','250 XP',xp>=250],['🏅','1000 XP',xp>=1000],['🔥','3 giorni di serie',streak()>=3],['👑','Livello 10',lvl>=10]];$('badges').innerHTML='';for(let [emoji,title,ok] of badges){let span=document.createElement('span');span.className='pill';span.style.opacity=ok?'1':'.4';span.textContent=emoji+' '+title;$('badges').appendChild(span)}}
+function openForm(t){editId=t?.id||null;$('formTitle').textContent=t?'Modifica attività':'Nuova attività';$('name').value=t?.name||'';$('start').value=t?.start||'14:00';$('end').value=t?.end||'15:00';$('category').value=t?.category||'Studio';$('points').value=t?.points||20;$('repeat').value=t?.repeat||'weekly';$('weekChecks').innerHTML='';for(let i=0;i<7;i++){let label=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.value=i;c.style.width='auto';c.checked=t?.days?.includes(i)??i===weekday(selected);label.append(c,' '+names[i]);$('weekChecks').append(label)}$('weekField').style.display=$('repeat').value==='once'?'none':'grid';$('modal').classList.add('show');$('name').focus()}
+$('repeat').onchange=()=>{$('weekField').style.display=$('repeat').value==='once'?'none':'grid'};$('form').onsubmit=e=>{e.preventDefault();let days=[...$('weekChecks').querySelectorAll('input:checked')].map(x=>Number(x.value));if($('repeat').value==='weekly'&&!days.length){alert('Seleziona almeno un giorno');return}if($('end').value<=$('start').value){alert('L’orario di fine deve essere successivo a quello di inizio');return}let t={id:editId||uid(),name:$('name').value.trim(),start:$('start').value,end:$('end').value,category:$('category').value,points:Number($('points').value),repeat:$('repeat').value,days,date:iso(selected)};if(!t.name)return;if(editId){let idx=state.tasks.findIndex(x=>x.id===editId);state.tasks[idx]=t}else state.tasks.push(t);save();$('modal').classList.remove('show');render()};$('add').onclick=()=>openForm();$('cancel').onclick=()=>{$('modal').classList.remove('show')};$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('show')};$('prev').onclick=()=>{selected.setDate(selected.getDate()-1);render()};$('next').onclick=()=>{selected.setDate(selected.getDate()+1);render()};$('current').onclick=()=>{selected=new Date();selected.setHours(12,0,0,0);render()};$('export').onclick=()=>{let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='routine-quest-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};$('import').onclick=()=>$('file').click();$('file').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let s=JSON.parse(await f.text());if(!Array.isArray(s.tasks)||!s.done||typeof s.done!=='object'||!s.tasks.every(t=>typeof t.id==='string'&&typeof t.name==='string'&&Array.isArray(t.days)))throw Error();if(confirm('Sostituire i dati attuali con quelli del backup?')){state=s;save();render()}}catch(e){alert('File di backup non valido')}e.target.value=''};render();
+
+// PWA navigation, monthly calendar and analytics
+let activeTab='daily';
+function switchTab(tab){
+ activeTab=tab;
+ document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+ document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
+ if(tab==='calendar')renderMonth();
+ if(tab==='insights')renderInsights();
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+let monthCursor=new Date(selected.getFullYear(),selected.getMonth(),1);
+function renderMonth(){
+ const y=monthCursor.getFullYear(),m=monthCursor.getMonth(),g=$('monthGrid');
+ $('monthTitle').textContent=monthCursor.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+ g.replaceChildren();
+ for(const n of names){let h=document.createElement('div');h.className='weekhead';h.textContent=n;g.appendChild(h)}
+ const offset=weekday(new Date(y,m,1)),last=new Date(y,m+1,0).getDate();
+ for(let i=0;i<offset;i++){let e=document.createElement('div');e.className='monthcell empty';g.appendChild(e)}
+ for(let d=1;d<=last;d++){
+  const dt=new Date(y,m,d,12),ts=tasksFor(dt),done=ts.filter(t=>state.done[key(t,dt)]).length;
+  const b=document.createElement('button');b.className='monthcell';
+  if(iso(dt)===iso(new Date()))b.classList.add('today');
+  if(iso(dt)===iso(selected))b.classList.add('selected');
+  const num=document.createElement('span');num.className='num';num.textContent=d;
+  const detail=document.createElement('span');detail.className='tiny';detail.textContent=ts.length?done+'/'+ts.length+' fatte':'Libero';
+  const bar=document.createElement('span');bar.className='mini';const fill=document.createElement('i');fill.style.width=(ts.length?done/ts.length*100:0)+'%';bar.append(fill);
+  b.append(num,detail,bar);b.setAttribute('aria-label',d+' '+$('monthTitle').textContent+', '+detail.textContent);
+  b.onclick=()=>{selected=dt;render();switchTab('daily')};g.appendChild(b);
+ }
+}
+$('monthPrev').onclick=()=>{monthCursor.setMonth(monthCursor.getMonth()-1);renderMonth()};
+$('monthNext').onclick=()=>{monthCursor.setMonth(monthCursor.getMonth()+1);renderMonth()};
+function renderInsights(){
+ let now=new Date();now.setHours(12,0,0,0);
+ let seven=[],thirty=[],allCompleted=0,allPlanned=0;
+ for(let i=29;i>=0;i--){let d=new Date(now);d.setDate(now.getDate()-i);let ts=tasksFor(d),done=ts.filter(t=>state.done[key(t,d)]);thirty.push({d,ts,done});allCompleted+=done.length;allPlanned+=ts.length}
+ seven=thirty.slice(-7);
+ let percent=allPlanned?Math.round(allCompleted/allPlanned*100):0;
+ const metrics=[['Completamento 30 gg',percent+'%'],['Attività completate',allCompleted],['XP accumulati',earned()],['Serie attuale',streak()+' gg'],['Attività programmate',allPlanned],['Livello',Math.floor(earned()/250)+1]];
+ $('metrics').replaceChildren();
+ for(const [label,value] of metrics){let e=document.createElement('div');e.className='metric';let s=document.createElement('span');s.className='muted';s.textContent=label;let b=document.createElement('b');b.textContent=value;e.append(s,b);$('metrics').append(e)}
+ $('weeklyChart').replaceChildren();
+ for(const item of seven){let col=document.createElement('div');col.className='chartcol';let pct=item.ts.length?Math.round(item.done.length/item.ts.length*100):0;
+ let val=document.createElement('span');val.textContent=pct+'%';let track=document.createElement('div');track.className='track';let fill=document.createElement('i');fill.style.height=pct+'%';track.append(fill);
+ let label=document.createElement('span');label.textContent=names[weekday(item.d)];col.append(val,track,label);$('weeklyChart').append(col)}
+ const cats={};for(const item of thirty)for(const t of item.ts){cats[t.category]??={done:0,total:0};cats[t.category].total++;if(state.done[key(t,item.d)])cats[t.category].done++}
+ $('categoryStats').replaceChildren();
+ for(const [name,x] of Object.entries(cats).sort((a,b)=>b[1].total-a[1].total)){let wrap=document.createElement('div');wrap.style.margin='12px 0';let line=document.createElement('div');line.className='row';line.style.justifyContent='space-between';let a=document.createElement('span');a.textContent=name;let b=document.createElement('span');b.className='hint';b.textContent=x.done+'/'+x.total+' · '+Math.round(x.done/x.total*100)+'%';line.append(a,b);let bar=document.createElement('div');bar.className='bar';bar.style.marginTop='6px';let fill=document.createElement('div');fill.className='fill';fill.style.width=(x.done/x.total*100)+'%';bar.append(fill);wrap.append(line,bar);$('categoryStats').append(wrap)}
+}
+// Notification reminders are best-effort while the app is active.
+const notificationPrefsKey='routineQuestNotificationsV2';
+let notifyPrefs={enabled:false,before:10};
+try{notifyPrefs={...notifyPrefs,...JSON.parse(localStorage.getItem(notificationPrefsKey)||'{}')}}catch(e){}
+$('notifyEnabled').checked=notifyPrefs.enabled;
+$('notifyBefore').value=String(notifyPrefs.before);
+function notifyStatus(message){$('notifyStatus').textContent=message}
+function persistPrefs(){localStorage.setItem(notificationPrefsKey,JSON.stringify(notifyPrefs))}
+const clientIdKey='routineQuestPushClientId',tokenKey='routineQuestPushToken';
+let clientId=localStorage.getItem(clientIdKey),pushToken=localStorage.getItem(tokenKey);
+if(!clientId){clientId=crypto.randomUUID();localStorage.setItem(clientIdKey,clientId)}
+if(!pushToken){pushToken=crypto.randomUUID()+crypto.randomUUID();localStorage.setItem(tokenKey,pushToken)}
+let syncTimer;
+function schedulePushSync(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>{if(notifyPrefs.enabled)syncPush().catch(e=>notifyStatus('Sincronizzazione non riuscita: '+e.message))},1200)}
+async function api(path,body){
+ const r=await fetch('/api/'+path,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Token':pushToken},body:JSON.stringify({...body,clientId})});
+ if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||'Errore server '+r.status);
+ return r.json();
+}
+function decodeKey(base64){const pad='='.repeat((4-base64.length%4)%4);const raw=atob((base64+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(raw,c=>c.charCodeAt(0))}
+async function getSubscription(){
+ const registration=await navigator.serviceWorker.ready;
+ let sub=await registration.pushManager.getSubscription();
+ if(!sub){const r=await fetch('/api/push-key');if(!r.ok)throw Error('Chiave push non disponibile');const {publicKey}=await r.json();sub=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(publicKey)})}
+ return sub;
+}
+async function syncPush(){
+ const sub=await getSubscription();
+ await api('subscribe',{subscription:sub.toJSON(),tasks:state.tasks,done:state.done,before:notifyPrefs.before,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Rome'});
+ notifyStatus('Promemoria push attivi: il server può inviarli anche ad app chiusa.');
+}
+$('notifyEnabled').onchange=async e=>{
+ if(e.target.checked){
+  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window)||!window.isSecureContext){e.target.checked=false;notifyStatus('Il browser non supporta Web Push oppure manca HTTPS.');return}
+  try{
+   const permission=await Notification.requestPermission();
+   if(permission!=='granted')throw Error('Autorizzazione alle notifiche non concessa');
+   await syncPush();notifyPrefs.enabled=true;persistPrefs();
+  }catch(err){e.target.checked=false;notifyPrefs.enabled=false;persistPrefs();notifyStatus('Impossibile attivare: '+err.message)}
+ }else{
+  notifyPrefs.enabled=false;persistPrefs();
+  try{await api('unsubscribe',{});notifyStatus('Promemoria disattivati.')}catch(e){notifyStatus('Disattivati qui; server non raggiungibile, riprova quando sei online.')}
+ }
+};
+$('notifyBefore').onchange=e=>{notifyPrefs.before=Number(e.target.value);persistPrefs();schedulePushSync()};
+$('testNotify').onclick=async()=>{
+ if(!notifyPrefs.enabled){notifyStatus('Prima attiva i promemoria.');return}
+ try{await api('test',{});notifyStatus('Notifica di prova richiesta al server.')}catch(e){notifyStatus('Errore: '+e.message)}
+};
+window.addEventListener('online',schedulePushSync);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedulePushSync()});
+if(notifyPrefs.enabled)window.addEventListener('load',schedulePushSync);
+let installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installBtn').style.display='inline-block';$('installHint').textContent='Il tuo browser supporta l’installazione.'});
+$('installBtn').onclick=async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installBtn').style.display='none'};
+window.addEventListener('appinstalled',()=>{$('installHint').textContent='App installata!';$('installBtn').style.display='none'});
+if('serviceWorker' in navigator && window.isSecureContext)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+
+</script></body></html>
