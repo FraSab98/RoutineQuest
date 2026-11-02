@@ -69,6 +69,12 @@ def subscribe():
              ON CONFLICT(client_id) DO UPDATE SET subscription=excluded.subscription,tasks=excluded.tasks,
              done=excluded.done,minutes_before=excluded.minutes_before,tz=excluded.tz,updated_at=now()""",
              (client,token,json.dumps(sub),json.dumps(tasks),json.dumps(done),minutes,tz))
+
+        app.logger.info(
+    "PUSH SYNC: tasks=%s, timezone=%s",
+    len(data.get("tasks", [])),
+    data.get("timezone")
+)
         return jsonify(ok=True)
     except (ValueError,KeyError) as e:return jsonify(error=str(e)),400
 
