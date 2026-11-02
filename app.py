@@ -316,5 +316,55 @@ def dispatch_route():
     return jsonify(ok=True, sent=sent)
 
 
+@app.post("/api/test-background")
+def test_background():
+    # Accesso protetto dalla stessa chiave di cron-job.org
+    if (
+        not CRON_SECRET
+        or request.headers.get("Authorization") != "Bearer " + CRON_SECRET
+    ):
+        return jsonify(error="Non autorizzato"), 403
+
+    sent = 0
+    failed = 0
+
+    with db() as c:
+        rows = c.execute(
+            "SELECT client_id, subscription FROM subscriptions"
+        ).fetchall()
+
+    app.logger.info(
+        "BACKGROUND TEST: subscriptions=%s",
+        len(rows)
+    )
+
+    for row in rows:
+        try:
+            push(
+                row["subscription"],
+                "🔔 Test Routine Quest",
+                "Notifica inviata da Render con l'app chiusa!",
+                "background-test-" + str(int(datetime.now(timezone.utc).timestamp()))
+            )
+
+            sent += 1
+            app.logger.info("BACKGROUND TEST: push accepted")
+
+        except WebPushException:
+            failed += 1
+            app.logger.exception("BACKGROUND TEST: push failed")
+
+        except Exception:
+            failed += 1
+            app.logger.exception("BACKGROUND TEST: unexpected error")
+
+    return jsonify(
+        ok=(failed == 0),
+        subscriptions=len(rows),
+        sent=sent,
+        failed=failed
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
