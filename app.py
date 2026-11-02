@@ -171,13 +171,21 @@ def unsubscribe():
     return jsonify(ok=True)
 
 
+
 def push(sub, title, body, tag):
     webpush(
         subscription_info=sub,
-        data=json.dumps({"title": title, "body": body, "tag": tag}),
+        data=json.dumps({
+            "title": title,
+            "body": body,
+            "tag": tag
+        }),
         vapid_private_key=VAPID_PRIVATE,
         vapid_claims={"sub": VAPID_SUBJECT},
         ttl=3600,
+        headers={
+            "Urgency": "high"
+        }
     )
 
 
